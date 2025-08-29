@@ -1,8 +1,10 @@
 name: Deploy Dev Stack
+
 on:
   push:
     branches:
       - develop
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -11,24 +13,36 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_DEV_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_DEV_SECRET_ACCESS_KEY }}
       AWS_CDK_BUCKET: ${{ secrets.AWS_CDK_DEV_S3 }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 22
+
       - name: Install AWS CDK
         run: npm install -g aws-cdk
+
       - name: Install dependencies
         run: yarn install
+
       - name: Build TypeScript
         run: yarn build
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Bootstrap CDK Environment (if needed)
+        run: cdk bootstrap aws://${{ env.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }} --toolkit-bucket ${{ env.AWS_CDK_BUCKET }} || echo "Bootstrap skipped: bucket exists"
+     
       - name: Deploy CDK Stack (Dev)
-        run: cdk deploy --context stage=dev --require-approval never --app "npx ts-node bin/infra.ts" --toolkit-bucket $AWS_CDK_BUCKET --region $AWS_REGION
+        run: cdk deploy --context stage=dev --require-approval never --app "npx ts-node bin/infra.ts" --toolkit-bucket ${{ env.AWS_CDK_BUCKET }} --region ${{ env.AWS_REGION }}
+
+
