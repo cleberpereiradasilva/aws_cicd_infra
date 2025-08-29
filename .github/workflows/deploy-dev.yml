@@ -39,10 +39,8 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Bootstrap CDK Environment (if needed)
-        run: cdk bootstrap aws://${{ env.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }} --toolkit-bucket ${{ env.AWS_CDK_BUCKET }} || echo "Bootstrap skipped: bucket exists"
-     
-      - name: Deploy CDK Stack (Dev)
+      - name: Bootstrap CDK Environment
+        run: cdk bootstrap aws://${{ env.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }} --toolkit-bucket ${{ env.AWS_CDK_BUCKET }}
+
+      - name: Deploy CDK Stack Dev
         run: cdk deploy --context stage=dev --require-approval never --app "npx ts-node bin/infra.ts" --toolkit-bucket ${{ env.AWS_CDK_BUCKET }} --region ${{ env.AWS_REGION }}
-
-
