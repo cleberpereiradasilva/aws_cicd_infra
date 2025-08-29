@@ -1,3 +1,14 @@
+terraform {
+  required_version = ">= 1.5.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+# Providers are declared once here. Selection per-stage is done in each resource via a conditional.
 provider "aws" {
   alias      = "dev"
   region     = var.aws_dev_region
@@ -13,6 +24,7 @@ provider "aws" {
 }
 
 locals {
-  prefix = "${var.stage}-"
+  prefix      = "${var.stage}-"
+  is_prd      = var.stage == "prd"
+  stack_label = "${var.stage}-v${var.version}"
 }
-

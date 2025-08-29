@@ -1,63 +1,31 @@
-variable "stage" {
-  type    = string
-  default = "dev"
-}
+# DynamoDB table 'Clients' with a GSI on CNPJ. Adjust keys/attributes to your real schema.
+resource "aws_dynamodb_table" "clients" {
+  provider         = var.stage == "prd" ? aws.prd : aws.dev
+  name             = "${var.stage}-Clients_${var.version}"
+  billing_mode     = "PAY_PER_REQUEST"
+  hash_key         = "id"
 
-provider "aws" {
-  alias  = "dev"
-  region = var.stage == "dev" ? "sa-east-1" : ""
-}
-
-provider "aws" {
-  alias  = "prd"
-  region = var.stage == "prd" ? "sa-east-1" : ""
-}
-
-resource "aws_dynamodb_table" "clients_dev" {
-  provider = aws.dev
-  count    = var.stage == "dev" ? 1 : 0
-
-  name           = "dev-Clients_v1"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "ID"
+  # Primary key attribute
   attribute {
-    name = "ID"
+    name = "id"
     type = "S"
   }
-  global_secondary_index {
-    name               = "dev-Clients_v1-CNPJIndex"
-    hash_key           = "CNPJ"
-    projection_type    = "ALL"
-  }
-  tags = {
-    Environment = "dev"
-    Project     = "MyProject"
-    Version     = "v1"
-  }
-}
 
-resource "aws_dynamodb_table" "clients_prd" {
-  provider = aws.prd
-  count    = var.stage == "prd" ? 1 : 0
-
-  name           = "prd-Clients_v1"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "ID"
+  # Attribute for the GSI
   attribute {
-    name = "ID"
+    name = "CNPJ"
     type = "S"
   }
+
   global_secondary_index {
-    name               = "prd-Clients_v1-CNPJIndex"
-    hash_key           = "CNPJ"
-    projection_type    = "ALL"
+    name            = "${var.stage}-Clients_${var.version}-CNPJIndex"
+    hash_key        = "CNPJ"
+    projection_type = "ALL"
   }
+
   tags = {
-    Environment = "prd"
+    Environment = var.stage
     Project     = "MyProject"
-    Version     = "v1"
+    Version     = var.version
   }
 }
-
-
-
