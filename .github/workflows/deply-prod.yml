@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      AWS_REGION: ${{ env.AWS_PRD_REGION }}
+      AWS_REGION: ${{ secrets.AWS_PRD_REGION }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_PRD_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_PRD_SECRET_ACCESS_KEY }}
     steps:
