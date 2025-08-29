@@ -12,7 +12,6 @@ jobs:
       AWS_REGION: ${{ secrets.AWS_DEV_REGION }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_DEV_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_DEV_SECRET_ACCESS_KEY }}
-      AWS_CDK_BUCKET: ${{ secrets.AWS_CDK_DEV_S3 }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
     steps:
       - name: Checkout
@@ -40,7 +39,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Bootstrap CDK Environment
-        run: cdk bootstrap aws://${{ env.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }} --toolkit-bucket ${{ env.AWS_CDK_BUCKET }}
+        run: cdk bootstrap aws://${{ env.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
 
       - name: Deploy CDK Stack Dev
-        run: cdk deploy --context stage=dev --require-approval never --app "npx ts-node bin/infra.ts" --toolkit-bucket ${{ env.AWS_CDK_BUCKET }} --region ${{ env.AWS_REGION }}
+        run: cdk deploy --context stage=dev --require-approval never --app "npx ts-node bin/infra.ts" --region ${{ env.AWS_REGION }}
