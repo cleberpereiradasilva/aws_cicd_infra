@@ -37,11 +37,11 @@ jobs:
 
       - name: Terraform Init Bootstrap
         working-directory: bootstrap
-        run: terraform init
+        run: terraform init -reconfigure -backend=false
 
       - name: Terraform Apply Bootstrap
         working-directory: bootstrap
-        run: terraform apply -auto-approve || echo "Tabela de lock já existe"
+        run: terraform apply -auto-approve -var="aws_region=$AWS_REGION" -var="aws_access_key=$AWS_ACCESS_KEY" -var="aws_secret_key=$AWS_SECRET_KEY" -var="stage=$WORKSPACE"
 
       - name: Terraform Init Main
         working-directory: .
