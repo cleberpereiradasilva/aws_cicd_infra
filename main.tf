@@ -66,14 +66,12 @@ resource "aws_dynamodb_table" "clients" {
   }
 }
 
-# Outputs
+
 output "clients_table_name" {
   value = aws_dynamodb_table.clients.name
 }
 
 output "clients_table_cnpj_index" {
-  value = aws_dynamodb_table.clients.global_secondary_index[0].name
+  value = [for gsi in aws_dynamodb_table.clients.global_secondary_index : gsi.name if gsi.name == "${terraform.workspace}-Clients-CNPJIndex"][0]
 }
-
-
 
