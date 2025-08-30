@@ -61,7 +61,8 @@ jobs:
       # ---------------------------
       - name: Terraform Init Main
         working-directory: .
-        run: terraform init -reconfigure \
+        run: |
+          terraform init -reconfigure \
           -backend-config="bucket=${S3_BUCKET}" \
           -backend-config="key=terraform.tfstate" \
           -backend-config="region=${AWS_REGION}" \
@@ -74,7 +75,8 @@ jobs:
 
       - name: Terraform Plan
         working-directory: .
-        run: terraform plan \
+        run: |
+          terraform plan \
           -var="stage=$WORKSPACE" \
           -var="aws_region=$AWS_REGION" \
           -var="aws_access_key=$AWS_ACCESS_KEY" \
@@ -83,7 +85,8 @@ jobs:
 
       - name: Terraform Apply
         working-directory: .
-        run: terraform apply -auto-approve \
+        run: |
+          terraform apply -auto-approve \
           -var="stage=$WORKSPACE" \
           -var="aws_region=$AWS_REGION" \
           -var="aws_access_key=$AWS_ACCESS_KEY" \
