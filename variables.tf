@@ -19,5 +19,9 @@ variable "billing_mode" {
   default     = "PAY_PER_REQUEST"
 }
 
-
+variable "stage" {
+  description = "Environment stage (dev, prod, etc.)"
+  type        = string
+  default     = "dev"  # opcional, se quiser um valor padrão
+}
 
