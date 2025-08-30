@@ -35,13 +35,23 @@ jobs:
             echo "WORKSPACE=dev" >> $GITHUB_ENV
           fi
 
-      - name: Terraform Init Bootstrap
-        working-directory: bootstrap
-        run: terraform init -reconfigure -backend=false
+      - name: Check if S3 bucket has Terraform state
+        id: check_bucket
+        run: |
+          if aws s3 ls s3://$S3_BUCKET/terraform.tfstate >/dev/null 2>&1; then
+            echo "Bucket already has Terraform state"
+            echo "RUN_BOOTSTRAP=false" >> $GITHUB_ENV
+          else
+            echo "Bucket is empty, will run bootstrap"
+            echo "RUN_BOOTSTRAP=true" >> $GITHUB_ENV
+          fi
 
-      - name: Terraform Apply Bootstrap
+      - name: Terraform Init & Apply Bootstrap
+        if: env.RUN_BOOTSTRAP == 'true'
         working-directory: bootstrap
-        run: terraform apply -auto-approve -var="aws_region=$AWS_REGION" -var="aws_access_key=$AWS_ACCESS_KEY" -var="aws_secret_key=$AWS_SECRET_KEY" -var="stage=$WORKSPACE" || echo "Tabela de lock já existe, continuando..."
+        run: |
+          terraform init -reconfigure -backend=false
+          terraform apply -auto-approve -var="aws_region=$AWS_REGION" -var="aws_access_key=$AWS_ACCESS_KEY" -var="aws_secret_key=$AWS_SECRET_KEY" -var="stage=$WORKSPACE"
 
       - name: Terraform Init Main
         working-directory: .
@@ -49,7 +59,7 @@ jobs:
 
       - name: Select or Create Workspace
         working-directory: .
-        run: terraform workspace select $WORKSPACE || terraform workspace new $WORKSPACE
+        run: terraform workspace select $WORKSPACE -or-create
 
       - name: Terraform Plan
         working-directory: .
