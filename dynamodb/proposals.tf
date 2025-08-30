@@ -34,7 +34,7 @@ resource "aws_dynamodb_table" "proposals" {
 
   tags = {
     Environment = terraform.workspace
-    Project     = "Seguros"
+    Project     = "Insurance Project"
   }
 }
 
