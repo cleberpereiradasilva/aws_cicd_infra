@@ -54,10 +54,12 @@ jobs:
           terraform apply -auto-approve -var="aws_region=$AWS_REGION" -var="aws_access_key=$AWS_ACCESS_KEY" -var="aws_secret_key=$AWS_SECRET_KEY" -var="stage=$WORKSPACE"
 
       - name: Terraform Init Main
+        if: env.RUN_BOOTSTRAP == 'true'
         working-directory: .
         run: terraform init -reconfigure -backend-config="bucket=${S3_BUCKET}" -backend-config="key=terraform.tfstate" -backend-config="region=${AWS_REGION}" -backend-config="dynamodb_table=${WORKSPACE}-terraform-locks" -backend-config="encrypt=true"
 
       - name: Select or Create Workspace
+        if: env.RUN_BOOTSTRAP == 'true'
         working-directory: .
         run: terraform workspace select $WORKSPACE -or-create
 
