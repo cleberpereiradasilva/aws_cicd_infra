@@ -2,16 +2,18 @@ terraform {
   required_version = ">= 1.3.0"
 
   backend "s3" {
-    bucket         = "cicd-cdk-dev"
+    bucket         = var.s3_bucket
     key            = "terraform.tfstate"
-    region         = "sa-east-1"
+    region         = var.aws_region
     dynamodb_table = "terraform-locks"
     encrypt        = true
   }
 }
 
 provider "aws" {
-  region = "sa-east-1"
+  region     = var.aws_region
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
 }
 
 variable "stage" {
@@ -20,6 +22,23 @@ variable "stage" {
   default     = "dev"
 }
 
+variable "aws_region" {
+  type = string
+}
+
+variable "aws_access_key" {
+  type = string
+}
+
+variable "aws_secret_key" {
+  type = string
+}
+
+variable "s3_bucket" {
+  type = string
+}
+
+# Tabela DynamoDB de Clients
 resource "aws_dynamodb_table" "clients" {
   name         = "${terraform.workspace}-Clients"
   billing_mode = "PAY_PER_REQUEST"
@@ -47,6 +66,7 @@ resource "aws_dynamodb_table" "clients" {
   }
 }
 
+# Outputs
 output "clients_table_name" {
   value = aws_dynamodb_table.clients.name
 }
@@ -54,5 +74,6 @@ output "clients_table_name" {
 output "clients_table_cnpj_index" {
   value = aws_dynamodb_table.clients.global_secondary_index[0].name
 }
+
 
 
