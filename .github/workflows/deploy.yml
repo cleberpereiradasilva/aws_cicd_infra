@@ -45,7 +45,7 @@ jobs:
 
       - name: Terraform Init Main
         working-directory: .
-        run: terraform init -reconfigure -backend-config="bucket=${S3_BUCKET}" -backend-config="key=terraform.tfstate" -backend-config="region=${AWS_REGION}" -backend-config="dynamodb_table=terraform-locks-${WORKSPACE}" -backend-config="encrypt=true"
+        run: terraform init -reconfigure -backend-config="bucket=${S3_BUCKET}" -backend-config="key=terraform.tfstate" -backend-config="region=${AWS_REGION}" -backend-config="dynamodb_table=${WORKSPACE}-terraform-locks" -backend-config="encrypt=true"
 
       - name: Select or Create Workspace
         working-directory: .

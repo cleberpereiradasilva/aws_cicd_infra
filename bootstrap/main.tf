@@ -10,7 +10,7 @@ variable "aws_secret_key" {}
 variable "stage" {}
 
 resource "aws_dynamodb_table" "terraform_locks" {
-  name         = "terraform-locks-${var.stage}"
+  name         = "${var.stage}-terraform-locks"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 
