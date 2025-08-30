@@ -1,5 +1,5 @@
 module "dynamodb" {
-  source = "../dynamodb"
+  source = "./dynamodb"
   stage  = var.stage
   aws_region = var.aws_region
   aws_access_key = var.aws_access_key
