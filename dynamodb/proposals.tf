@@ -8,9 +8,11 @@ resource "aws_dynamodb_table" "proposals" {
     type = "S"
   }
 
-  attribute {
-    name = "insurer_id"
-    type = "S"
+  # Index para pesquisar por client_id
+  global_secondary_index {
+    name            = "${terraform.workspace}-proposals-client-id-index"
+    hash_key        = "client_id"
+    projection_type = "ALL"
   }
 
   attribute {
@@ -18,14 +20,22 @@ resource "aws_dynamodb_table" "proposals" {
     type = "S"
   }
 
+  # Index para pesquisar por insurer_id
+  global_secondary_index {
+    name            = "${terraform.workspace}-proposals-insurer-id-index"
+    hash_key        = "insurer_id"
+    projection_type = "ALL"
+  }
+
   attribute {
-    name = "created_at"
+    name = "insurer_id"
     type = "S"
   }
 
   tags = {
     Environment = terraform.workspace
-    Project     = "Insurance Project"
+    Project     = "Seguros"
   }
 }
+
 
