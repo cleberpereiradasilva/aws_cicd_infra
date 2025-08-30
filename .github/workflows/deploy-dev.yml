@@ -28,28 +28,28 @@ jobs:
       # Bootstrap (cria tabela de lock se necessário)
       # ---------------------------
       - name: Terraform Init Bootstrap
-        working-directory: terraform/bootstrap
+        working-directory: bootstrap
         run: terraform init
 
       - name: Terraform Apply Bootstrap
-        working-directory: terraform/bootstrap
+        working-directory: bootstrap
         run: terraform apply -auto-approve || echo "Tabela de lock já existe"
 
       # ---------------------------
       # Pipeline principal
       # ---------------------------
       - name: Terraform Init Main
-        working-directory: terraform
+        working-directory: .
         run: terraform init -reconfigure
 
       - name: Select or Create Workspace
-        working-directory: terraform
+        working-directory: .
         run: terraform workspace select dev || terraform workspace new dev
 
       - name: Terraform Plan
-        working-directory: terraform
+        working-directory: .
         run: terraform plan -var="stage=dev"
 
       - name: Terraform Apply
-        working-directory: terraform
+        working-directory: .
         run: terraform apply -auto-approve -var="stage=dev"
