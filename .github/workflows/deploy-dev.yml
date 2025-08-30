@@ -1,0 +1,70 @@
+name: Terraform CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.6
+
+      # ---------------------------
+      # Set environment variables based on branch
+      # ---------------------------
+      - name: Set environment variables
+        id: set-env
+        run: |
+          if [ "${GITHUB_REF_NAME}" == "main" ]; then
+            echo "AWS_REGION=${{ secrets.AWS_PRD_REGION }}" >> $GITHUB_ENV
+            echo "AWS_ACCESS_KEY=${{ secrets.AWS_PRD_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_KEY=${{ secrets.AWS_PRD_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "S3_BUCKET=${{ secrets.AWS_CDK_PRD_S3 }}" >> $GITHUB_ENV
+            echo "WORKSPACE=prd" >> $GITHUB_ENV
+          else
+            echo "AWS_REGION=${{ secrets.AWS_DEV_REGION }}" >> $GITHUB_ENV
+            echo "AWS_ACCESS_KEY=${{ secrets.AWS_DEV_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_KEY=${{ secrets.AWS_DEV_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "S3_BUCKET=${{ secrets.AWS_CDK_DEV_S3 }}" >> $GITHUB_ENV
+            echo "WORKSPACE=dev" >> $GITHUB_ENV
+          fi
+
+      # ---------------------------
+      # Bootstrap (cria tabela terraform-locks se necessário)
+      # ---------------------------
+      - name: Terraform Init Bootstrap
+        working-directory: bootstrap
+        run: terraform init
+
+      - name: Terraform Apply Bootstrap
+        working-directory: bootstrap
+        run: terraform apply -auto-approve || echo "Tabela de lock já existe"
+
+      # ---------------------------
+      # Pipeline principal
+      # ---------------------------
+      - name: Terraform Init Main
+        working-directory: .
+        run: terraform init -reconfigure -backend-config="bucket=${S3_BUCKET}" -backend-config="key=terraform.tfstate" -backend-config="region=${AWS_REGION}" -backend-config="dynamodb_table=terraform-locks" -backend-config="encrypt=true"
+
+      - name: Select or Create Workspace
+        working-directory: .
+        run: terraform workspace select $WORKSPACE || terraform workspace new $WORKSPACE
+
+      - name: Terraform Plan
+        working-directory: .
+        run: terraform plan -var="stage=$WORKSPACE" -var="aws_region=$AWS_REGION" -var="aws_access_key=$AWS_ACCESS_KEY" -var="aws_secret_key=$AWS_SECRET_KEY" -var="s3_bucket=$S3_BUCKET"
+
+      - name: Terraform Apply
+        working-directory: .
+        run: terraform apply -auto-approve -var="stage=$WORKSPACE" -var="aws_region=$AWS_REGION" -var="aws_access_key=$AWS_ACCESS_KEY" -var="aws_secret_key=$AWS_SECRET_KEY" -var="s3_bucket=$S3_BUCKET"
