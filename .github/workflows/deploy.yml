@@ -11,19 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.6
 
-      # 3. Set environment variables based on branch
       - name: Set environment variables
-        id: set-env
         run: |
           if [ "${GITHUB_REF_NAME}" == "main" ]; then
             echo "AWS_REGION=${{ secrets.AWS_PRD_REGION }}" >> $GITHUB_ENV
@@ -39,19 +35,17 @@ jobs:
             echo "WORKSPACE=dev" >> $GITHUB_ENV
           fi
 
-      # 4. Bootstrap (cria tabela terraform-locks se necessário)
       - name: Terraform Init Bootstrap
         working-directory: bootstrap
-        run: terraform init
+        run: terraform init -reconfigure -backend=false
 
       - name: Terraform Apply Bootstrap
         working-directory: bootstrap
-        run: terraform apply -auto-approve || echo "Tabela de lock já existe"
+        run: terraform apply -auto-approve -var="aws_region=$AWS_REGION" -var="aws_access_key=$AWS_ACCESS_KEY" -var="aws_secret_key=$AWS_SECRET_KEY" -var="stage=$WORKSPACE"
 
-      # 5. Pipeline principal
       - name: Terraform Init Main
         working-directory: .
-        run: terraform init -reconfigure -backend-config="bucket=${S3_BUCKET}" -backend-config="key=terraform.tfstate" -backend-config="region=${AWS_REGION}" -backend-config="dynamodb_table=terraform-locks" -backend-config="encrypt=true"
+        run: terraform init -reconfigure -backend-config="bucket=${S3_BUCKET}" -backend-config="key=terraform.tfstate" -backend-config="region=${AWS_REGION}" -backend-config="dynamodb_table=${WORKSPACE}-terraform-locks" -backend-config="encrypt=true"
 
       - name: Select or Create Workspace
         working-directory: .
