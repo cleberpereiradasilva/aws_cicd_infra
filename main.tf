@@ -10,6 +10,10 @@ terraform {
   }
 }
 
+module "dynamodb" {
+  source = "./dynamodb"
+  # passe variáveis do módulo, se houver
+}
 
 
 
