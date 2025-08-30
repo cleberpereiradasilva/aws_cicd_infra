@@ -40,7 +40,7 @@ variable "s3_bucket" {
 
 # Tabela DynamoDB de Clients
 resource "aws_dynamodb_table" "clients" {
-  name         = "${terraform.workspace}-Clients"
+  name         = "${terraform.workspace}-clients"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "id"
 
@@ -55,7 +55,7 @@ resource "aws_dynamodb_table" "clients" {
   }
 
   global_secondary_index {
-    name            = "${terraform.workspace}-Clients-CNPJIndex"
+    name            = "${terraform.workspace}-clients-CNPJIndex"
     hash_key        = "CNPJ"
     projection_type = "ALL"
   }
@@ -72,6 +72,6 @@ output "clients_table_name" {
 }
 
 output "clients_table_cnpj_index" {
-  value = [for gsi in aws_dynamodb_table.clients.global_secondary_index : gsi.name if gsi.name == "${terraform.workspace}-Clients-CNPJIndex"][0]
+  value = [for gsi in aws_dynamodb_table.clients.global_secondary_index : gsi.name if gsi.name == "${terraform.workspace}-clients-CNPJIndex"][0]
 }
 
