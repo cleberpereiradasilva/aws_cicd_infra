@@ -52,6 +52,7 @@ output "clients_table_name" {
 }
 
 output "clients_table_cnpj_index" {
-  value = aws_dynamodb_table.clients.global_secondary_indexes[0].name
+  value = aws_dynamodb_table.clients.global_secondary_index[0].name
 }
+
 
