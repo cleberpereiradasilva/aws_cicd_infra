@@ -11,17 +11,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      # 1. Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2. Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.6
 
-      # ---------------------------
-      # Set environment variables based on branch
-      # ---------------------------
+      # 3. Set environment variables based on branch
       - name: Set environment variables
         id: set-env
         run: |
@@ -39,9 +39,7 @@ jobs:
             echo "WORKSPACE=dev" >> $GITHUB_ENV
           fi
 
-      # ---------------------------
-      # Bootstrap (cria tabela terraform-locks se necessário)
-      # ---------------------------
+      # 4. Bootstrap (cria tabela terraform-locks se necessário)
       - name: Terraform Init Bootstrap
         working-directory: bootstrap
         run: terraform init
@@ -50,9 +48,7 @@ jobs:
         working-directory: bootstrap
         run: terraform apply -auto-approve || echo "Tabela de lock já existe"
 
-      # ---------------------------
-      # Pipeline principal
-      # ---------------------------
+      # 5. Pipeline principal
       - name: Terraform Init Main
         working-directory: .
         run: terraform init -reconfigure -backend-config="bucket=${S3_BUCKET}" -backend-config="key=terraform.tfstate" -backend-config="region=${AWS_REGION}" -backend-config="dynamodb_table=terraform-locks" -backend-config="encrypt=true"
