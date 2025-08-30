@@ -15,21 +15,22 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_DEV_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_DEV_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEV_REGION }}
+
       - name: Terraform Init
         run: terraform init
 
+      - name: Select Workspace
+        run: |
+          terraform workspace select dev || terraform workspace new dev
+
       - name: Terraform Plan
-        run: terraform plan \
-          -var "stage=dev" \
-          -var "aws_dev_region=${{ secrets.AWS_DEV_REGION }}" \
-          -var "aws_dev_access_key=${{ secrets.AWS_DEV_ACCESS_KEY_ID }}" \
-          -var "aws_dev_secret_key=${{ secrets.AWS_DEV_SECRET_ACCESS_KEY }}" \
-          -var "aws_cdk_dev_s3=${{ secrets.AWS_CDK_DEV_S3 }}"
+        run: terraform plan -var="stage=dev"
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve \
-          -var "stage=dev" \
-          -var "aws_dev_region=${{ secrets.AWS_DEV_REGION }}" \
-          -var "aws_dev_access_key=${{ secrets.AWS_DEV_ACCESS_KEY_ID }}" \
-          -var "aws_dev_secret_key=${{ secrets.AWS_DEV_SECRET_ACCESS_KEY }}" \
-          -var "aws_cdk_dev_s3=${{ secrets.AWS_CDK_DEV_S3 }}"
+        run: terraform apply -auto-approve -var="stage=dev"

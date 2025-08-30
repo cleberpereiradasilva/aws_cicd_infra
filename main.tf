@@ -5,14 +5,11 @@ terraform {
     bucket         = "meu-terraform-states"
     key            = "dynamodb/terraform.tfstate"
     region         = "sa-east-1"
-    dynamodb_table = "terraform-locks"
+    use_lockfile   = true
     encrypt        = true
   }
 }
 
-provider "aws" {
-  region = terraform.workspace == "prd" ? var.aws_prd_region : var.aws_dev_region
-}
 
 
 
