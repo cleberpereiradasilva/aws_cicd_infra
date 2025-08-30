@@ -2,24 +2,24 @@ terraform {
   required_version = ">= 1.3.0"
 
   backend "s3" {
-    bucket       = "cicd-cdk-dev"
-    key          = "dynamodb/terraform.tfstate"
-    region       = "sa-east-1"
-    use_lockfile = true
-    encrypt      = true
+    bucket         = "cicd-cdk-dev"                  # Bucket S3 do Terraform state
+    key            = "terraform.tfstate"             # Caminho dentro do bucket
+    region         = "sa-east-1"
+    dynamodb_table = "terraform-locks"              # Tabela para lock distribuído
+    encrypt        = true
   }
 }
 
-# Variável para stage
+# Variável stage (opcional)
 variable "stage" {
-  description = "Environment stage (dev, prod, etc.)"
+  description = "Environment stage"
   type        = string
   default     = "dev"
 }
 
-# DynamoDB Table para locks ou uso geral
-resource "aws_dynamodb_table" "this" {
-  name         = "terraform-locks-${var.stage}"
+# Tabela DynamoDB usada para lock do Terraform
+resource "aws_dynamodb_table" "terraform_locks" {
+  name         = "terraform-locks"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 
@@ -27,16 +27,44 @@ resource "aws_dynamodb_table" "this" {
     name = "LockID"
     type = "S"
   }
+}
+
+# Tabela real de clients
+resource "aws_dynamodb_table" "clients" {
+  name         = "${terraform.workspace}-Clients"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  attribute {
+    name = "CNPJ"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "${terraform.workspace}-Clients-CNPJIndex"
+    hash_key        = "CNPJ"
+    projection_type = "ALL"
+  }
 
   tags = {
-    Environment = var.stage
-    Terraform   = "true"
+    Environment = terraform.workspace
+    Project     = "MeuApp"
   }
 }
 
-# Output do nome da tabela
-output "dynamodb_table_name" {
-  value = aws_dynamodb_table.this.name
+# Outputs
+output "clients_table_name" {
+  value = aws_dynamodb_table.clients.name
 }
+
+output "clients_table_cnpj_index" {
+  value = aws_dynamodb_table.clients.global_secondary_indexes[0].name
+}
+
 
 
