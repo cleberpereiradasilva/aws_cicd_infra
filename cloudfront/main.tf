@@ -2,10 +2,6 @@ resource "aws_cloudfront_origin_access_identity" "this" {
   comment = "${var.stage}"
 }
 
-resource "aws_cloudfront_origin_access_identity" "this" {
-  comment = "${var.stage}"
-}
-
 resource "aws_s3_bucket_policy" "bucket_policy" {
   bucket = var.bucket_name
 
@@ -28,7 +24,6 @@ resource "aws_cloudfront_distribution" "this" {
   enabled             = true
   default_root_object = "index.html"
   comment = "${var.stage}"
-  description = "${var.stage}"
 
   origin {
     domain_name = "${var.bucket_name}.s3.${var.aws_region}.amazonaws.com"
