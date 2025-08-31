@@ -25,7 +25,7 @@ resource "aws_cloudfront_distribution" "this" {
   default_root_object = "index.html"
 
   origin {
-    domain_name = "${var.bucket_name}.s3.${var.region}.amazonaws.com"
+    domain_name = "${var.bucket_name}.s3.${var.aws_region}.amazonaws.com"
     origin_id   = var.bucket_name
 
     s3_origin_config {
