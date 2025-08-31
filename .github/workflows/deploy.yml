@@ -38,7 +38,7 @@ jobs:
       - name: Check if S3 bucket has Terraform state
         id: check_bucket
         run: |
-          if aws s3 ls s3://$S3_BUCKET/terraform.tfstate >/dev/null 2>&1; then
+          if aws s3 ls s3://$S3_BUCKET/env:/ >/dev/null 2>&1; then
             echo "Bucket already has Terraform state"
             echo "RUN_BOOTSTRAP=false" >> $GITHUB_ENV
           else
