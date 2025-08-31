@@ -62,7 +62,7 @@ jobs:
 
       - name: Select or Create Workspace
         working-directory: .
-        run: terraform workspace select "$WORKSPACE" || terraform workspace new "$WORKSPACE"
+        run: terraform workspace select -or-create "$WORKSPACE"
 
       - name: Terraform Plan
         working-directory: .
