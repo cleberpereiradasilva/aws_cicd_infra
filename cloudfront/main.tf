@@ -24,7 +24,6 @@ resource "aws_cloudfront_distribution" "this" {
   enabled             = true
   default_root_object = "index.html"
   comment = "${var.stage}"
-  description = "${var.stage}"
 
   origin {
     domain_name = "${var.bucket_name}.s3.${var.aws_region}.amazonaws.com"
