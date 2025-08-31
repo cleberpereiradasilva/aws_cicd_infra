@@ -1,3 +1,7 @@
+terraform {
+  backend "s3" {}
+}
+
 module "dynamodb" {
   source = "./dynamodb"
   stage  = var.stage
