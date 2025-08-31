@@ -15,13 +15,10 @@ variable "aws_secret_key" {
   type = string
 }
 
-variable "s3_bucket" {
-  type = string
+provider "aws" {
+  region     = var.aws_region
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
 }
 
-variable "bucket_suffix" {
-  type        = string
-  description = "Unique suffix for all S3 buckets"
-  default     = "D8019"
-}
 
