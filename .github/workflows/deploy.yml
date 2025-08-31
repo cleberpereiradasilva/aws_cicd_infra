@@ -22,26 +22,28 @@ jobs:
       - name: Set environment variables
         run: |
           if [ "${GITHUB_REF_NAME}" == "main" ]; then
-            echo "AWS_REGION=${{ secrets.AWS_PRD_REGION }}" >> $GITHUB_ENV
-            echo "AWS_ACCESS_KEY=${{ secrets.AWS_PRD_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-            echo "AWS_SECRET_KEY=${{ secrets.AWS_PRD_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-            echo "S3_BUCKET=${{ secrets.AWS_CDK_PRD_S3 }}" >> $GITHUB_ENV
-            echo "WORKSPACE=prd" >> $GITHUB_ENV
+            export AWS_REGION=${{ secrets.AWS_PRD_REGION }}
+            export AWS_ACCESS_KEY=${{ secrets.AWS_PRD_ACCESS_KEY_ID }}
+            export AWS_SECRET_KEY=${{ secrets.AWS_PRD_SECRET_ACCESS_KEY }}
+            export S3_BUCKET=${{ secrets.AWS_CDK_PRD_S3 }}
+            export WORKSPACE=prd
           else
-            echo "AWS_REGION=${{ secrets.AWS_DEV_REGION }}" >> $GITHUB_ENV
-            echo "AWS_ACCESS_KEY=${{ secrets.AWS_DEV_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-            echo "AWS_SECRET_KEY=${{ secrets.AWS_DEV_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-            echo "S3_BUCKET=${{ secrets.AWS_CDK_DEV_S3 }}" >> $GITHUB_ENV
-            echo "WORKSPACE=dev" >> $GITHUB_ENV
+            export AWS_REGION=${{ secrets.AWS_DEV_REGION }}
+            export AWS_ACCESS_KEY=${{ secrets.AWS_DEV_ACCESS_KEY_ID }}
+            export AWS_SECRET_KEY=${{ secrets.AWS_DEV_SECRET_ACCESS_KEY }}
+            export S3_BUCKET=${{ secrets.AWS_CDK_DEV_S3 }}
+            export WORKSPACE=dev
           fi
+          echo "AWS_REGION=$AWS_REGION" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY=$AWS_ACCESS_KEY" >> $GITHUB_ENV
+          echo "AWS_SECRET_KEY=$AWS_SECRET_KEY" >> $GITHUB_ENV
+          echo "S3_BUCKET=$S3_BUCKET" >> $GITHUB_ENV
+          echo "WORKSPACE=$WORKSPACE" >> $GITHUB_ENV
 
       - name: Check if S3 bucket has Terraform state
-        export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
-        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
-        export AWS_DEFAULT_REGION=$AWS_REGION
         id: check_bucket
         run: |
-          if aws s3 ls s3://$S3_BUCKET/ | grep -q .; then
+          if aws s3 ls s3://$S3_BUCKET/terraform.tfstate >/dev/null 2>&1; then
             echo "Bucket já tem Terraform state, pulando bootstrap"
             echo "RUN_BOOTSTRAP=false" >> $GITHUB_ENV
           else
@@ -73,7 +75,7 @@ jobs:
       - name: Select or Create Workspace
         working-directory: .
         run: |
-          terraform workspace select "$WORKSPACE" || terraform workspace new "$WORKSPACE"
+          terraform workspace select $WORKSPACE || terraform workspace new $WORKSPACE
 
       - name: Terraform Plan
         working-directory: .
