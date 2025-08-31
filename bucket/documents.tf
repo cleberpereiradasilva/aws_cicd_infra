@@ -22,7 +22,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "documents" {
-  bucket = "${terraform.workspace}-documents"
+  bucket = "${terraform.workspace}-insurance-documents"
 
   tags = {
     Environment = terraform.workspace
