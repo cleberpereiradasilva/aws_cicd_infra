@@ -22,6 +22,6 @@ variable "s3_bucket" {
 variable "bucket_suffix" {
   type        = string
   description = "Unique suffix for all S3 buckets"
-  default     = "dd8019"
+  default     = "abap8019"
 }
 
