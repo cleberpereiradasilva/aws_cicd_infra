@@ -1,5 +1,5 @@
 resource "aws_cloudfront_origin_access_identity" "this" {
-  comment = "Access identity for CloudFront to access S3"
+  comment = "${var.stage}"
 }
 
 resource "aws_s3_bucket_policy" "bucket_policy" {
@@ -25,7 +25,7 @@ resource "aws_cloudfront_distribution" "this" {
   default_root_object = "index.html"
 
   origin {
-    domain_name = "${var.bucket_name}.s3.amazonaws.com"
+    domain_name = "${var.bucket_name}.s3.${var.region}.amazonaws.com"
     origin_id   = var.bucket_name
 
     s3_origin_config {
