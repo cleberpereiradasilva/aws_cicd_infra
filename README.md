@@ -67,14 +67,18 @@ Before running Terraform, **manually create the state buckets**:
 
 ### List Buckets
 
-aws s3 ls
+```
+$ aws s3 ls
+```
 
 ### Delete all dev buckets (can be adapted for prod)
 
-for bucket in $(aws s3api list-buckets --query "Buckets[].Name" --output text | tr '\t' '\n' | grep '^dev-'); do  
-  echo "Deleting bucket: $bucket"  
-  aws s3 rb s3://$bucket --force  
+```
+$ for bucket in $(aws s3api list-buckets --query "Buckets[].Name" --output text | tr '\t' '\n' | grep '^dev-'); do
+  echo "Deleting bucket: $bucket"
+  aws s3 rb s3://$bucket --force
 done
+```
 
 ---
 
@@ -86,6 +90,10 @@ done
 ---
 
 ## 🗂 Terraform Folder Structure
+
+```
+
+```
 
 ├── README.md  
 ├── prd-policy.md  
@@ -109,6 +117,8 @@ done
 ├── main.tf  
 └── variables.tf
 
+```
+
 > 📝 Each environment uses **prefixes (`dev-*` / `prod-*`)** to prevent accidental cross-environment changes.
 
 ---
@@ -122,3 +132,4 @@ done
 ---
 
 🚀 **Happy Deploying!**
+```
