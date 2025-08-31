@@ -21,4 +21,9 @@ module "documents_bucket" {
   bucket_suffix  = var.bucket_suffix
 }
 
-
+module "cloudfront" {
+  source         = "./cloudfront"
+  stage          = var.stage
+  aws_region     = var.aws_region
+  bucket_name    = module.documents_bucket.bucket_name
+}
