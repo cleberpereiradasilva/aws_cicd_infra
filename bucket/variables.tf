@@ -21,4 +21,9 @@ provider "aws" {
   secret_key = var.aws_secret_key
 }
 
+variable "bucket_suffix" {
+  description = "Unique suffix for all S3 buckets"
+  type        = string
+}
+
 
