@@ -93,30 +93,27 @@ done
 
 ```
 
-```
-
-├── README.md  
-├── prd-policy.md  
-├── dev-policy.md  
-├── bootstrap  
-│ └── main.tf  
-├── bucket  
-│ ├── documents.tf  
-│ ├── outputs.tf  
-│ ├── variables.tf  
-│ └── web-files.tf  
-├── cloudfront  
-│ ├── main.tf  
-│ ├── outputs.tf  
-│ └── variables.tf  
-├── dynamodb  
-│ ├── clients.tf  
-│ ├── insurers.tf  
-│ ├── proposals.tf  
-│ └── variables.tf  
-├── main.tf  
+├── README.md
+├── prd-policy.md
+├── dev-policy.md
+├── bootstrap
+│ └── main.tf
+├── bucket
+│ ├── documents.tf
+│ ├── outputs.tf
+│ ├── variables.tf
+│ └── web-files.tf
+├── cloudfront
+│ ├── main.tf
+│ ├── outputs.tf
+│ └── variables.tf
+├── dynamodb
+│ ├── clients.tf
+│ ├── insurers.tf
+│ ├── proposals.tf
+│ └── variables.tf
+├── main.tf
 └── variables.tf
-
 ```
 
 > 📝 Each environment uses **prefixes (`dev-*` / `prod-*`)** to prevent accidental cross-environment changes.
@@ -132,4 +129,7 @@ done
 ---
 
 🚀 **Happy Deploying!**
+
+```
+
 ```
