@@ -1,88 +1,124 @@
-# AWS CDK Infrastructure Project
+# 🏗 Insurance Project Infrastructure (Terraform)
 
-This project manages AWS infrastructure using AWS CDK (TypeScript).  
-Currently includes a DynamoDB table, with plans to add frontend and other resources.
-
----
-
-## Prerequisites
-
-- Node.js >= 20
-- Yarn or npm
-- AWS CLI configured with a user that has AdministratorAccess
-- AWS CDK installed globally (`npm install -g aws-cdk`)
+This project manages the AWS infrastructure for the Insurance Project using **Terraform**.  
+We maintain **separate environments** for `dev` and `prod` to ensure safety and isolation.
 
 ---
 
-## Project Setup
+## 🌎 Environment Overview
 
-1. Install dependencies:  
-   `yarn install`
+- **Dev Environment**:
+  - Prefix: `dev-*`
+  - AWS Region: **Virginia (us-east-1)**
+  - GitHub Secrets: `AWS_DEV_REGION`, `AWS_DEV_ACCESS_KEY_ID`, `AWS_DEV_SECRET_ACCESS_KEY`, `AWS_CDK_DEV_S3`
+  - Terraform State Bucket: `dev-terraform-state-{suffix}` (manual creation required)
 
-2. Build TypeScript:  
-   `yarn build`
+- **Prod Environment**:
+  - Prefix: `prod-*`
+  - AWS Region: **São Paulo (sa-east-1)**
+  - GitHub Secrets: `AWS_PRD_REGION`, `AWS_PRD_ACCESS_KEY_ID`, `AWS_PRD_SECRET_ACCESS_KEY`, `AWS_CDK_PRD_S3`
+  - Terraform State Bucket: `prd-terraform-state-{suffix}` (manual creation required)
 
----
-
-## Bootstrapping AWS Environment
-
-The CDK requires a bootstrap stack to create S3 buckets for assets and roles for deployments.
-
-`cdk bootstrap aws://<AWS_ACCOUNT_ID>/<AWS_REGION>`
-
-Replace `<AWS_ACCOUNT_ID>` with your AWS account ID and `<AWS_REGION>` with your desired AWS region (e.g., `sa-east-1`).
-
-The default bootstrap bucket will be created as:  
-`cdk-hnb659fds-assets-<account>-<region>`
+> ⚠️ The `suffix` variable in the root `variables.tf` is required for **uniqueness of the S3 bucket names**.
 
 ---
 
-## Deploying Stacks
+## 👥 GitHub Accounts & Policies
 
-`cdk deploy --context stage=dev --app "npx ts-node bin/infra.ts" --region <AWS_REGION>`
+We recommend **two separate GitHub accounts** for CI/CD:
 
-- `--context stage=dev` sets the environment prefix (`dev-` or `prd-`)
-- `--region <AWS_REGION>` ensures all resources are created in the correct region
+- `dev` account → uses `dev-policy.md`
+- `prod` account → uses `prod-policy.md`
 
-> You can create multiple stacks for frontend, backend, databases, etc., following the same structure.
-
----
-
-## Useful Commands
-
-- Check active AWS user:  
-  `aws sts get-caller-identity`
-
-- List CDK bootstrap buckets:  
-  `aws s3 ls | grep cdk-hnb659fds-assets`
-
-- Delete a bucket (force delete all objects):  
-  `aws s3 rb s3://cdk-hnb659fds-assets-<account>-<region> --force`
-
-- Delete bootstrap stack:  
-  `aws cloudformation delete-stack --stack-name CDKToolkit --region <AWS_REGION>`
-
-- Diff / See planned changes:  
-  `cdk diff --context stage=dev --app "npx ts-node bin/infra.ts"`
+> Copy the corresponding policy file to your IAM user in AWS.
 
 ---
 
-## Common Issues
+## 📦 Initial Terraform Buckets
 
-1. **Bucket not found / Cannot publish assets**
-   - Ensure bootstrap stack exists in the correct region.
-   - Ensure your user has `s3:PutObject`, `s3:GetObject`, and `s3:ListBucket` permissions.
+Before running Terraform, **manually create the state buckets**:
 
-2. **Deploying to wrong region**
-   - Always pass `--region <AWS_REGION>`. CDK assets buckets are region-specific.
+- `dev-terraform-state-{suffix}`
+- `prd-terraform-state-{suffix}`
 
-3. **TypeScript build errors**
-   - Ensure `bin` and `lib` folders are included in `tsconfig.json`:  
-     `"include": ["bin/**/*.ts", "lib/**/*.ts"]`
+> These buckets will be used for Terraform remote state storage.
 
 ---
 
-## References
+## 🔑 GitHub Secrets
 
-- [AWS CDK Documentation](https://docs.aws.amazon.com/cdk/latest/guide/home.html)
-- [AWS DynamoDB](https://docs.aws.amazon.com/dynamodb/)
+### Dev
+
+- AWS_DEV_REGION
+- AWS_DEV_ACCESS_KEY_ID
+- AWS_DEV_SECRET_ACCESS_KEY
+- AWS_CDK_DEV_S3
+
+### Prod
+
+- AWS_PRD_REGION
+- AWS_PRD_ACCESS_KEY_ID
+- AWS_PRD_SECRET_ACCESS_KEY
+- AWS_CDK_PRD_S3
+
+---
+
+## 🛠 Useful Commands
+
+### List Buckets
+
+aws s3 ls
+
+### Delete all dev buckets (can be adapted for prod)
+
+for bucket in $(aws s3api list-buckets --query "Buckets[].Name" --output text | tr '\t' '\n' | grep '^dev-'); do  
+  echo "Deleting bucket: $bucket"  
+  aws s3 rb s3://$bucket --force  
+done
+
+---
+
+## 🌱 Branches & CI/CD
+
+- The pipeline triggers on **`main`** and **`develop`** branches.
+- Ensure you have a **`develop`** branch for dev deployments.
+
+---
+
+## 🗂 Terraform Folder Structure
+
+├── README.md  
+├── prd-policy.md  
+├── dev-policy.md  
+├── bootstrap  
+│ └── main.tf  
+├── bucket  
+│ ├── documents.tf  
+│ ├── outputs.tf  
+│ ├── variables.tf  
+│ └── web-files.tf  
+├── cloudfront  
+│ ├── main.tf  
+│ ├── outputs.tf  
+│ └── variables.tf  
+├── dynamodb  
+│ ├── clients.tf  
+│ ├── insurers.tf  
+│ ├── proposals.tf  
+│ └── variables.tf  
+├── main.tf  
+└── variables.tf
+
+> 📝 Each environment uses **prefixes (`dev-*` / `prod-*`)** to prevent accidental cross-environment changes.
+
+---
+
+## ⚡ Tips
+
+- Always double-check **region variables** when running Terraform.
+- Make sure the initial state buckets exist **before running any pipeline**.
+- Dev environment is cheaper and faster for testing; Prod is in São Paulo for latency with the main app.
+
+---
+
+🚀 **Happy Deploying!**
