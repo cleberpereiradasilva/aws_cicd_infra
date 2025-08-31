@@ -26,4 +26,5 @@ module "cloudfront" {
   stage          = var.stage
   aws_region     = var.aws_region
   bucket_name    = module.documents_bucket.bucket_name
+  bucket_arn     = module.documents_bucket.bucket_arn
 }
